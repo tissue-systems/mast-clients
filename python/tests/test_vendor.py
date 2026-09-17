@@ -36,6 +36,8 @@ class VendoredCopy(unittest.TestCase):
         sent = module.Channel(mast.url).send(title="db-01", body="down")
         self.assertEqual(sent.id, MESSAGE_ID)
 
+    @unittest.skipUnless(hasattr(sys, "stdlib_module_names"),
+                         "sys.stdlib_module_names arrived in 3.10")
     def test_the_standard_library_is_all_it_needs(self):
         tree = ast.parse(vendor.TARGET.read_text())
         imported = set()
