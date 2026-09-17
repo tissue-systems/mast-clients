@@ -3,6 +3,11 @@
 A client for one [Mast](https://tissue.systems/docs/mast/connect/) channel: send
 a page, then wait for somebody to acknowledge it.
 
+Mast is a pager for one iPhone:
+[Mast Pager](https://apps.apple.com/us/app/mast-pager/id6805232044?pt=129362925&ct=crates-client&mt=8)
+on the App Store. A channel is a URL the app hands you, and this library is the
+sending end.
+
 ```toml
 [dependencies]
 mast-pager = "0.1"

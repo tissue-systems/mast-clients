@@ -3,6 +3,11 @@
 Client libraries for the [Mast](https://tissue.systems/docs/mast/connect/) ingest
 API: send to a channel, and wait for the acknowledgement.
 
+Mast is a pager for one iPhone:
+[Mast Pager](https://apps.apple.com/us/app/mast-pager/id6805232044?pt=129362925&ct=github-clients&mt=8)
+on the App Store. A channel is a URL the app hands you, and these libraries
+are the sending end.
+
 | | Directory | Install | Tests |
 |---|---|---|---|
 | Python | [`python/`](python) | `pip install mast-pager`, or vendor [one file](python/vendor/mast.py) | `cd python && python3 -m unittest discover -s tests -t .` |

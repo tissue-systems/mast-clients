@@ -3,6 +3,11 @@
 Send to a [Mast](https://tissue.systems/docs/mast/connect/) channel from Python, and wait for
 somebody to acknowledge the page.
 
+Mast is a pager for one iPhone:
+[Mast Pager](https://apps.apple.com/us/app/mast-pager/id6805232044?pt=129362925&ct=pypi-client&mt=8)
+on the App Store. A channel is a URL the app hands you, and this library is the
+sending end.
+
 ```
 pip install mast-pager
 ```
