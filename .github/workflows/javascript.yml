@@ -1,0 +1,28 @@
+name: javascript
+
+on:
+  push:
+    paths:
+      - javascript/**
+      - .github/workflows/javascript.yml
+  pull_request:
+    paths:
+      - javascript/**
+      - .github/workflows/javascript.yml
+
+defaults:
+  run:
+    working-directory: javascript
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["18", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test

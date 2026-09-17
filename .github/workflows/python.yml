@@ -1,0 +1,28 @@
+name: python
+
+on:
+  push:
+    paths:
+      - python/**
+      - .github/workflows/python.yml
+  pull_request:
+    paths:
+      - python/**
+      - .github/workflows/python.yml
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests -t . -v

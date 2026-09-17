@@ -1,0 +1,29 @@
+[package]
+name = "mast-pager"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Send to a Mast channel and wait for the acknowledgement"
+license = "MIT"
+repository = "https://github.com/tissue-systems/mast-clients"
+homepage = "https://tissue.systems/docs/mast/connect/"
+keywords = ["mast", "pager", "alerting", "notifications", "on-call"]
+categories = ["api-bindings"]
+
+[lib]
+name = "mast"
+
+[features]
+default = ["reqwest"]
+# The bundled HTTP transport. Turn it off to keep the wire rules and the poller
+# and drive them with a Transport of your own.
+reqwest = ["dep:reqwest", "tokio"]
+tokio = ["dep:tokio"]
+
+[dependencies]
+serde_json = "1"
+reqwest = { version = "0.13", features = ["rustls"], default-features = false, optional = true }
+tokio = { version = "1", features = ["time"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "time"] }

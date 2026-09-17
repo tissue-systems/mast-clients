@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mast-pager"
+version = "0.1.0"
+description = "Send to a Mast channel and wait for the acknowledgement"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Tissue Systems, Inc." }]
+keywords = ["mast", "pager", "notifications", "alerting", "on-call"]
+dependencies = []
+classifiers = [
+  "Intended Audience :: System Administrators",
+  "Programming Language :: Python :: 3",
+  "Topic :: System :: Monitoring",
+]
+
+[project.urls]
+Homepage = "https://tissue.systems/docs/mast/connect/"
+Source = "https://github.com/tissue-systems/mast-clients"
+
+[tool.setuptools]
+packages = ["mast_pager"]
