@@ -26,4 +26,4 @@ reqwest = { version = "0.13", features = ["rustls"], default-features = false, o
 tokio = { version = "1", features = ["time"], optional = true }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "time"] }
+tokio = { version = "=1.53.1", features = ["macros", "rt", "rt-multi-thread", "time"] }
