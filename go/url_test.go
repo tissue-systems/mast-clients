@@ -17,6 +17,8 @@ func TestOpenTakesEveryShapeOfChannelURL(t *testing.T) {
 		{"bare key", goodKey, DefaultHost, ""},
 		{"no scheme", "mast.example.com/m/" + goodKey, "https://mast.example.com", "/m"},
 		{"with a port", "http://127.0.0.1:8899/m/" + goodKey, "http://127.0.0.1:8899", "/m"},
+		{"http on localhost", "http://localhost:8899/" + goodKey, "http://localhost:8899", ""},
+		{"http on ipv6 loopback", "http://[::1]:8899/" + goodKey, "http://[::1]:8899", ""},
 		{"pasted with whitespace", "  https://mast.tissue.dev/" + goodKey + "\n", "https://mast.tissue.dev", ""},
 		{"trailing slash", "https://mast.tissue.dev/" + goodKey + "/", "https://mast.tissue.dev", ""},
 	}
@@ -82,5 +84,27 @@ func TestStringDoesNotCarryTheWholeKey(t *testing.T) {
 	}
 	if !strings.Contains(described, "mk_1c9f") {
 		t.Errorf("String() = %q, want the first few characters of the key", described)
+	}
+}
+
+func TestOpenRefusesPlainHTTPOffLoopback(t *testing.T) {
+	for _, raw := range []string{
+		"http://mast.tissue.dev/" + goodKey,
+		"http://mast.internal:8080/m/" + goodKey,
+		"http://127.0.0.1.example.com/" + goodKey,
+	} {
+		if _, err := Open(raw); err == nil {
+			t.Errorf("Open(%q) succeeded, want an error", raw)
+		}
+	}
+}
+
+func TestAParseErrorDoesNotEchoTheKey(t *testing.T) {
+	_, err := Open("https://%zz/" + goodKey)
+	if err == nil {
+		t.Fatal("want an error")
+	}
+	if strings.Contains(err.Error(), goodKey) {
+		t.Fatalf("error carries the key: %v", err)
 	}
 }

@@ -392,3 +392,15 @@ async fn a_message_can_be_built_before_the_channel_is() {
     channel.send(message).await.unwrap();
     assert!(stub.last_body().contains("timestamp=1760000000"));
 }
+
+#[cfg(feature = "reqwest")]
+#[tokio::test]
+async fn a_connection_error_does_not_carry_the_key() {
+    // Port 1 on loopback refuses the connection. reqwest's own Display for
+    // that error names the URL, and the URL is the credential.
+    let channel = Channel::open(&format!("http://127.0.0.1:1/m/{KEY}")).unwrap();
+    let err = channel.send(Message::new().body("x")).await.unwrap_err();
+    assert!(matches!(err, Error::Unreachable(_)), "{err}");
+    assert!(!err.to_string().contains(KEY), "{err}");
+    assert!(!format!("{err:?}").contains(KEY), "{err:?}");
+}

@@ -33,10 +33,28 @@ fn assumes_https_when_no_scheme_was_pasted() {
 }
 
 #[test]
-fn allows_http_for_a_host_on_a_private_network() {
-    let channel = open(&format!("http://mast.internal:8080/m/{KEY}")).unwrap();
-    assert_eq!(channel.origin(), "http://mast.internal:8080");
-    assert_eq!(channel.url(), format!("http://mast.internal:8080/m/{KEY}"));
+fn refuses_plain_http_off_loopback() {
+    // The key travels in the path, so plain http would send it in the clear.
+    for raw in [
+        format!("http://mast.internal:8080/m/{KEY}"),
+        format!("http://mast.tissue.dev/{KEY}"),
+        format!("http://127.0.0.1.example.com/{KEY}"),
+        format!("http://localhost@evil.example/{KEY}"),
+    ] {
+        assert!(matches!(open(&raw), Err(Error::InvalidUrl(_))), "{raw}");
+    }
+}
+
+#[test]
+fn allows_http_on_loopback() {
+    for origin in [
+        "http://localhost:8080",
+        "http://127.0.0.1:8082",
+        "http://[::1]:8082",
+    ] {
+        let channel = open(&format!("{origin}/m/{KEY}")).unwrap();
+        assert_eq!(channel.origin(), origin);
+    }
 }
 
 #[test]

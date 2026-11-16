@@ -357,7 +357,12 @@ func TestAHostThatIsNotListeningIsUnreachable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := channel.Send(context.Background(), Message{Body: "a"}); !errors.Is(err, ErrUnreachable) {
+	_, err = channel.Send(context.Background(), Message{Body: "a"})
+	if !errors.Is(err, ErrUnreachable) {
 		t.Fatalf("err = %v, want ErrUnreachable", err)
+	}
+	// url.Error prints the request URL, and the URL is the credential.
+	if strings.Contains(err.Error(), goodKey) {
+		t.Fatalf("error carries the key: %v", err)
 	}
 }
