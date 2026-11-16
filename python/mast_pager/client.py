@@ -66,6 +66,21 @@ POLL_LADDER = ((30, 3.0), (300, 10.0), (None, 30.0))
 
 _TIMEOUT = 15
 
+_LOOPBACK = ("localhost", "127.0.0.1", "::1")
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Hands every 3xx back to the caller instead of following it.
+
+    urllib turns a redirected POST into a GET to the Location, which drops the
+    message and still answers 200. Mast's ingest routes never redirect, so a
+    3xx means the URL is wrong (http that an edge bounces to https, a moved
+    host) and the send has to fail rather than look delivered.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
 
 class MastError(Exception):
     """Anything that went wrong talking to Mast."""
@@ -180,6 +195,11 @@ def parse_channel_url(raw):
     parts = urllib.parse.urlsplit(raw)
     if parts.scheme not in ("http", "https") or not parts.netloc:
         raise ValueError("A channel URL has to be an http(s) URL")
+    if parts.scheme == "http" and parts.hostname not in _LOOPBACK:
+        # The key is the credential, and it is in the path: over plain http it
+        # crosses the network in the clear. Loopback is the one exception, for
+        # a local edge in development.
+        raise ValueError("A channel URL has to use https (http is only for localhost)")
 
     segments = [s for s in parts.path.split("/") if s]
     prefix = ""
@@ -202,7 +222,7 @@ class Channel:
     def __init__(self, url, timeout=_TIMEOUT, opener=None):
         self.origin, self.prefix, self.key = parse_channel_url(url)
         self.timeout = timeout
-        self._opener = opener or urllib.request.build_opener()
+        self._opener = opener or urllib.request.build_opener(_NoRedirect)
 
     @property
     def url(self):
@@ -321,11 +341,17 @@ class Channel:
             # either side of the durability line, so a blind retry can page
             # twice; retry with a dedupe key or not at all.
             raise MastError(_message(payload, "Mast answered %d" % status))
+        if status >= 400:
+            # 401, 403 (a paused channel answers 403 over_cap), 405, 409...
+            # Nothing was stored, and the server says why.
+            raise Rejected(_message(payload, "Mast refused the send (%d)" % status))
+        if status >= 300:
+            raise MastError("Mast answered %d, a redirect; check the channel URL" % status)
         return payload
 
     def _get(self, url):
         status, payload = self._request(urllib.request.Request(url))
-        if status >= 400:
+        if status >= 300:
             raise MastError(_message(payload, "Mast answered %d" % status))
         return payload
 

@@ -34,6 +34,13 @@ describe("parseChannelUrl", () => {
     assert.equal(parsed.origin, "http://127.0.0.1:8899");
   });
 
+  test("refuses plain http off loopback", () => {
+    for (const raw of [`http://mast.tissue.dev/${GOOD_KEY}`, `http://127.0.0.1.example.com/${GOOD_KEY}`]) {
+      assert.throws(() => parseChannelUrl(raw), TypeError);
+    }
+    assert.equal(parseChannelUrl(`http://localhost:8899/${GOOD_KEY}`).origin, "http://localhost:8899");
+  });
+
   test("ignores whitespace around a pasted URL", () => {
     const parsed = parseChannelUrl(`  https://mast.tissue.dev/${GOOD_KEY}\n`);
     assert.equal(parsed.key, GOOD_KEY);

@@ -203,6 +203,18 @@ describe("what the server answers", () => {
     });
   });
 
+  for (const [status, label] of [[403, "a paused channel (403 over_cap)"], [401, "a 401"], [405, "a 405"], [409, "a 409"]]) {
+    test(`${label} is a rejection, not a send`, async () => {
+      mast.sendStatus = status;
+      mast.sendError = "This channel is paused.";
+      await assert.rejects(() => channel.send({ body: "a" }), (err) => {
+        assert.ok(err instanceof Rejected);
+        assert.match(err.message, /paused/);
+        return true;
+      });
+    });
+  }
+
   test("a redirect is not followed, so the key is not handed on", async () => {
     mast.redirect = true;
     await assert.rejects(() => channel.send({ body: "a" }), { name: "Unreachable" });

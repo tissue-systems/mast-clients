@@ -24,6 +24,7 @@ class FakeMast:
         self.duplicate = False
         self.send_status = 202
         self.send_error = None
+        self.send_error_headers = None
         self.rate_limited = 0  # number of answers to burn on a 429
         self.retry_after = "1"
         self._server = None
@@ -95,7 +96,7 @@ def _handler_for(fake):
 
             if fake.send_error is not None:
                 status, code, message = fake.send_error
-                return self._error(status, code, message)
+                return self._error(status, code, message, headers=fake.send_error_headers)
 
             body = {"ok": True, "id": MESSAGE_ID, "state": fake.state}
             if fake.duplicate:
