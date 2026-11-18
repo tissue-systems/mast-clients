@@ -227,7 +227,7 @@ func (c *Channel) messageURL(messageID string) string {
 func (c *Channel) post(ctx context.Context, target string, form url.Values) (Sent, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, strings.NewReader(form.Encode()))
 	if err != nil {
-		return Sent{}, fmt.Errorf("%w: %v", ErrUnreachable, err)
+		return Sent{}, unreachable(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -251,7 +251,7 @@ func (c *Channel) post(ctx context.Context, target string, form url.Values) (Sen
 func (c *Channel) get(ctx context.Context, target string) (map[string]any, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrUnreachable, err)
+		return nil, unreachable(err)
 	}
 	status, payload, err := c.do(req)
 	if err != nil {
@@ -270,7 +270,7 @@ func (c *Channel) do(req *http.Request) (int, map[string]any, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, nil, fmt.Errorf("%w: %v", ErrUnreachable, err)
+		return 0, nil, unreachable(err)
 	}
 	defer resp.Body.Close()
 
@@ -332,6 +332,19 @@ func retryAfter(header string) time.Duration {
 	return time.Duration(seconds) * time.Second
 }
 
+// unreachable wraps a transport error as ErrUnreachable without the request
+// URL. A *url.Error prints as `Post "https://…/mk_…": dial tcp …`, and the
+// URL carries the channel key, which is the credential.
+func unreachable(err error) error {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		return fmt.Errorf("%w: %s: %w", ErrUnreachable, urlErr.Op, urlErr.Err)
+	}
+	return fmt.Errorf("%w: %v", ErrUnreachable, err)
+}
+
+var loopbackHosts = map[string]bool{"localhost": true, "127.0.0.1": true, "::1": true}
+
 func parseChannelURL(raw string) (origin, prefix, key string, err error) {
 	text := strings.TrimSpace(raw)
 	if text == "" {
@@ -345,13 +358,19 @@ func parseChannelURL(raw string) (origin, prefix, key string, err error) {
 	}
 	parsed, err := url.Parse(text)
 	if err != nil {
-		return "", "", "", fmt.Errorf("mast: %q is not a URL", raw)
+		// Not echoed: the text may hold the channel key.
+		return "", "", "", errors.New("mast: the channel URL could not be parsed")
 	}
 	if parsed.Scheme != "https" && parsed.Scheme != "http" {
 		return "", "", "", errors.New("mast: a channel URL has to be an http(s) URL")
 	}
 	if parsed.Host == "" {
-		return "", "", "", fmt.Errorf("mast: %q has no host", raw)
+		return "", "", "", errors.New("mast: the channel URL has no host")
+	}
+	if parsed.Scheme == "http" && !loopbackHosts[strings.ToLower(parsed.Hostname())] {
+		// The key is the credential and it sits in the path, so plain http
+		// sends it in the clear. Loopback is allowed for a local edge.
+		return "", "", "", errors.New("mast: a channel URL has to use https (http is only for localhost)")
 	}
 
 	var segments []string

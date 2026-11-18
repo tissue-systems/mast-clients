@@ -76,6 +76,8 @@ export function isMessageId(value) {
 // the app, the explicit /m/ path the management API serves, a host with no
 // scheme, and a bare key. The prefix that was pasted is kept rather than
 // normalised, so an edge without the "/" to "/m/" rewrite still works.
+const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
 export function parseChannelUrl(raw) {
   const text = String(raw ?? "").trim();
   if (!text) throw new TypeError("No channel URL given");
@@ -85,10 +87,16 @@ export function parseChannelUrl(raw) {
   try {
     parsed = new URL(text.includes("://") ? text : `https://${text}`);
   } catch {
-    throw new TypeError(`${text} is not a URL`);
+    // Not echoed: the text may hold the channel key.
+    throw new TypeError("The channel URL could not be parsed");
   }
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
     throw new TypeError("A channel URL has to be an http(s) URL");
+  }
+  if (parsed.protocol === "http:" && !LOOPBACK.has(parsed.hostname)) {
+    // The key is the credential and it sits in the path, so plain http sends
+    // it across the network in the clear. Loopback is allowed for a local edge.
+    throw new TypeError("A channel URL has to use https (http is only for localhost)");
   }
 
   let segments = parsed.pathname.split("/").filter(Boolean);
@@ -252,12 +260,18 @@ export class Channel {
       // with a dedupe key or not at all.
       throw new MastError(errorMessage(payload, `Mast answered ${status}`));
     }
+    if (status >= 400) {
+      // 401, 403 (a paused channel answers 403 over_cap), 405, 409...
+      // Nothing was stored, and the server says why.
+      throw new Rejected(errorMessage(payload, `Mast refused the send (${status})`));
+    }
+    if (status >= 300) throw new MastError(`Mast answered ${status}`);
     return payload;
   }
 
   async _get(url) {
     const { status, payload } = await this._request(url, { method: "GET" });
-    if (status >= 400) throw new MastError(errorMessage(payload, `Mast answered ${status}`));
+    if (status >= 300) throw new MastError(errorMessage(payload, `Mast answered ${status}`));
     return payload;
   }
 

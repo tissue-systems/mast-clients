@@ -1,6 +1,6 @@
 import unittest
 
-from mast_pager import Channel, RateLimited, Rejected, UnknownChannel
+from mast_pager import Channel, MastError, RateLimited, Rejected, UnknownChannel
 
 from .fake_mast import MESSAGE_ID, OTHER_KEY, FakeMast
 
@@ -189,3 +189,40 @@ class ServerAnswers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RefusalsAreErrors(unittest.TestCase):
+    """Any answer that isn't a 2xx means nothing was stored."""
+
+    def setUp(self):
+        self.mast = FakeMast().start()
+        self.addCleanup(self.mast.stop)
+        self.channel = Channel(self.mast.url)
+
+    def test_a_paused_channel(self):
+        self.mast.send_error = (403, "over_cap", "This channel is paused.")
+        with self.assertRaises(Rejected) as caught:
+            self.channel.send(body="x")
+        self.assertIn("paused", str(caught.exception))
+
+    def test_unauthorized(self):
+        self.mast.send_error = (401, "unauthorized", "Unauthorized.")
+        with self.assertRaises(Rejected):
+            self.channel.send(body="x")
+
+    def test_conflict(self):
+        self.mast.send_error = (409, "conflict", "Conflict.")
+        with self.assertRaises(Rejected):
+            self.channel.send(body="x")
+
+    def test_a_redirect_is_not_followed(self):
+        # Followed, a 302 turns the POST into a GET of the Location, which
+        # answers 200 and would read as a successful send.
+        self.mast.set_message(MESSAGE_ID)
+        self.mast.send_error_headers = {
+            "Location": "%s/messages/%s" % (self.mast.url, MESSAGE_ID)}
+        for status in (301, 302, 303, 307, 308):
+            self.mast.send_error = (status, "moved", "Moved.")
+            with self.assertRaises(MastError) as caught:
+                self.channel.send(body="x")
+            self.assertNotIsInstance(caught.exception, Rejected)

@@ -52,6 +52,13 @@ mod bundled {
 
     const DEFAULT_TIMEOUT: Duration = Duration::from_secs(15);
 
+    /// reqwest's Display for a connect or timeout error ends "for url (…)",
+    /// and the URL carries the channel key, so it is dropped before the error
+    /// becomes text that ends up in somebody's logs.
+    fn unreachable(err: reqwest::Error) -> Error {
+        Error::Unreachable(err.without_url().to_string())
+    }
+
     /// The bundled transport.
     pub struct ReqwestTransport {
         client: reqwest::Client,
@@ -65,7 +72,7 @@ mod bundled {
                 // to whoever answered.
                 .redirect(reqwest::redirect::Policy::none())
                 .build()
-                .map_err(|err| Error::Unreachable(err.to_string()))?;
+                .map_err(unreachable)?;
             Ok(Self { client })
         }
 
@@ -89,10 +96,7 @@ mod bundled {
                         .body(body);
                 }
 
-                let response = builder
-                    .send()
-                    .await
-                    .map_err(|err| Error::Unreachable(err.to_string()))?;
+                let response = builder.send().await.map_err(unreachable)?;
 
                 let status = response.status().as_u16();
                 let retry_after = response
@@ -101,11 +105,7 @@ mod bundled {
                     .and_then(|value| value.to_str().ok())
                     .and_then(|value| value.trim().parse::<u64>().ok())
                     .map(Duration::from_secs);
-                let body = response
-                    .bytes()
-                    .await
-                    .map_err(|err| Error::Unreachable(err.to_string()))?
-                    .to_vec();
+                let body = response.bytes().await.map_err(unreachable)?.to_vec();
 
                 Ok(Response {
                     status,

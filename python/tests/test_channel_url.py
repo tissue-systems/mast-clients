@@ -39,6 +39,16 @@ class ParseChannelUrl(unittest.TestCase):
         origin, _, _ = parse_channel_url("http://127.0.0.1:8082/m/" + KEY)
         self.assertEqual(origin, "http://127.0.0.1:8082")
 
+    def test_plain_http_is_refused(self):
+        for raw in ("http://mast.tissue.dev/" + KEY, "http://example.test/m/" + KEY,
+                    "http://127.0.0.1.example.test/" + KEY):
+            with self.assertRaises(ValueError):
+                parse_channel_url(raw)
+
+    def test_plain_http_on_loopback(self):
+        self.assertEqual(parse_channel_url("http://localhost:8082/" + KEY)[0],
+                         "http://localhost:8082")
+
     def test_empty(self):
         with self.assertRaises(ValueError):
             parse_channel_url("")

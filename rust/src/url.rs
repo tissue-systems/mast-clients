@@ -55,7 +55,16 @@ pub(crate) fn parse_channel_url(raw: &str) -> Result<(String, String, String), E
         None => (rest, ""),
     };
     if authority.is_empty() {
-        return Err(Error::InvalidUrl(format!("{raw:?} has no host")));
+        // Not echoed: the text may hold the channel key.
+        return Err(Error::InvalidUrl("the channel URL has no host".into()));
+    }
+    if scheme == "http" && !is_loopback(authority) {
+        // The key is the credential and it sits in the path, so plain http
+        // sends it across the network in the clear. Loopback is allowed for a
+        // local edge in development.
+        return Err(Error::InvalidUrl(
+            "a channel URL has to use https (http is only for localhost)".into(),
+        ));
     }
 
     let mut segments = path.split('/').filter(|s| !s.is_empty());
@@ -75,6 +84,20 @@ pub(crate) fn parse_channel_url(raw: &str) -> Result<(String, String, String), E
         )));
     }
     Ok((format!("{scheme}://{authority}"), prefix, first.to_string()))
+}
+
+/// True when the authority's host is localhost, 127.0.0.1 or [::1].
+fn is_loopback(authority: &str) -> bool {
+    let host = authority.rsplit('@').next().unwrap_or(authority);
+    let host = if host.starts_with('[') {
+        host.split_inclusive(']').next().unwrap_or(host)
+    } else {
+        host.split(':').next().unwrap_or(host)
+    };
+    matches!(
+        host.to_ascii_lowercase().as_str(),
+        "localhost" | "127.0.0.1" | "[::1]"
+    )
 }
 
 /// Percent-encode one value for an `application/x-www-form-urlencoded` body.
