@@ -56,10 +56,10 @@ not spend one of the channel's 60 requests a minute.
 `page()` is `send()` at the pager tier. `resolve({ key })` closes whatever that
 key has open, and `resolve({ messageId })` closes one specific card.
 
-## Vitals
+## Heartbeats
 
-A vital is a channel that expects to hear from you. `ping()` with no arguments
-is a heartbeat, which stores no card and returns no id. `fail()` flatlines it
+A heartbeat is a channel that expects to hear from you. `ping()` with no arguments
+is a beat, which stores no card and returns no id. `fail()` flatlines it
 now instead of waiting out the grace window.
 
 ```js

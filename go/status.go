@@ -3,7 +3,7 @@ package mast
 import "time"
 
 // Sent is what Mast answered a send with. State is one of queued, muted,
-// deduped, suppressed, alive or resolved; ID is empty for a heartbeat, which
+// deduped, suppressed, alive or resolved; ID is empty for a beat, which
 // stores no card.
 type Sent struct {
 	ID        string

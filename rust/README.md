@@ -33,7 +33,7 @@ let sent = channel
     )
     .await?;
 
-// Only a heartbeat comes back without an id.
+// Only a beat comes back without an id.
 let status = channel
     .wait(sent.id.as_deref().unwrap(), Some(Duration::from_secs(300)))
     .await?;
@@ -71,10 +71,10 @@ not spend one of the channel's 60 requests a minute.
 `page` sends at the pager tier. `resolve_key` closes whatever that dedupe key
 has open, and `resolve_message` closes one specific card.
 
-## Vitals
+## Heartbeats
 
-A vital is a channel that expects to hear from you. `ping` with an empty
-`Message` is a heartbeat, which stores no card and returns no id. `fail`
+A heartbeat is a channel that expects to hear from you. `ping` with an empty
+`Message` is a beat, which stores no card and returns no id. `fail`
 flatlines it now instead of waiting out the grace window.
 
 ```rust

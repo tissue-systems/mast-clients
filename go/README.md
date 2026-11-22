@@ -72,15 +72,15 @@ not spend one of the channel's 60 requests a minute.
 `Page` sends at the pager tier. `ResolveKey` closes whatever that dedupe key
 has open, and `ResolveMessage` closes one specific card.
 
-## Vitals
+## Heartbeats
 
-A vital is a channel that expects to hear from you. `Ping` with an empty
-`Message` is a heartbeat, which stores no card and returns no id. `Fail`
+A heartbeat is a channel that expects to hear from you. `Ping` with an empty
+`Message` is a beat, which stores no card and returns no id. `Fail`
 flatlines it now instead of waiting out the grace window.
 
 ```go
 if _, err := channel.Ping(ctx, mast.Message{}); err != nil {
-	log.Println("heartbeat did not land:", err)
+	log.Println("beat did not land:", err)
 }
 
 if _, err := channel.Fail(ctx, mast.Message{Body: "backup exited 1"}); err != nil {

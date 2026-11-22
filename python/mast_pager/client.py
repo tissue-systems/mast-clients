@@ -275,7 +275,7 @@ class Channel:
         return self.send(body=body, title=title, **kw)
 
     def ping(self, body=None, title=None, **kw):
-        """A heartbeat on a vital. With no text it is proof of life and no card.
+        """A beat on a heartbeat. With no text it is proof of life and no card.
 
         The answering state is "alive" and there is no id to follow, so nothing
         to poll.
@@ -283,9 +283,9 @@ class Channel:
         return self.send(body=body, title=title, **kw)
 
     def fail(self, body=None, title=None, **kw):
-        """Flatline a vital now, instead of waiting out its grace window.
+        """Flatline a heartbeat now, instead of waiting out its grace window.
 
-        Only a vital has this route. On a plain channel it answers the same 404
+        Only a heartbeat has this route. On a plain channel it answers the same 404
         an unknown key gets, because saying otherwise would describe the
         channel to whoever is holding the key.
         """
@@ -556,7 +556,7 @@ def _build(body=None, title=None, priority=None, url=None, url_title=None, key=N
         fields["resolve"] = str(resolve)
 
     # No check for an empty set of fields: a send with nothing in it is a
-    # vital's heartbeat.
+    # beat on a heartbeat.
     return fields
 
 

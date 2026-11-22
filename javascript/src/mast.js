@@ -201,14 +201,15 @@ export class Channel {
     return this.send({ ...rest, resolve: "1", key });
   }
 
-  // A heartbeat on a vital. With no text it is proof of life and no card, so
+  // A beat on a heartbeat. With no text it is proof of life and no card, so
   // there is no id to follow.
   async ping(message = {}) {
     return this.send(message);
   }
 
-  // Flatline a vital now instead of waiting out its grace window. Only a vital
-  // has this route; a plain channel answers the same 404 an unknown key gets.
+  // Flatline a heartbeat now instead of waiting out its grace window. Only a
+  // heartbeat has this route; a plain channel answers the same 404 an unknown
+  // key gets.
   async fail(message = {}) {
     return new Sent(await this._post(`${this.url}/fail`, fields(message)));
   }
@@ -501,7 +502,7 @@ function fields(message) {
   if (message.timestamp !== undefined) out.timestamp = String(message.timestamp);
   if (message.resolve !== undefined) out.resolve = String(message.resolve);
 
-  // No check for an empty set of fields: a send with nothing in it is a vital's
+  // No check for an empty set of fields: a send with nothing in it is a beat on a
   // heartbeat.
   return out;
 }

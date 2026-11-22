@@ -85,13 +85,13 @@ impl Channel {
         self.send(message.with_resolve(message_id)).await
     }
 
-    /// A heartbeat on a vital. An empty message is proof of life and no card.
+    /// A beat on a heartbeat. An empty message is proof of life and no card.
     pub async fn ping(&self, message: Message) -> Result<Sent, Error> {
         self.send(message).await
     }
 
-    /// Flatline a vital now rather than waiting out its grace window. Only a
-    /// vital has this route; a plain channel answers the 404 an unknown key
+    /// Flatline a heartbeat now rather than waiting out its grace window. Only a
+    /// heartbeat has this route; a plain channel answers the 404 an unknown key
     /// gets.
     pub async fn fail(&self, message: Message) -> Result<Sent, Error> {
         let form = message.into_form()?;

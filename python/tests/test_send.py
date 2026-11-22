@@ -35,7 +35,7 @@ class SendTest(unittest.TestCase):
         self.assertEqual(self.last()["priority"], "page")
         self.assertEqual(self.last()["key"], "release")
 
-    def test_a_heartbeat_carries_nothing(self):
+    def test_a_beat_carries_nothing(self):
         self.mast.state = "alive"
         sent = self.channel.ping()
         self.assertEqual(self.last(), {})
