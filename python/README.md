@@ -45,9 +45,9 @@ except UnknownChannel:
     ...
 ```
 
-## Vitals
+## Heartbeats
 
-A vital is a channel that pages when it stops hearing from you.
+A heartbeat is a channel that pages when it stops hearing from you.
 
 ```python
 mast.ping()                          # proof of life, no card on the phone

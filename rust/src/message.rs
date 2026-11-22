@@ -66,7 +66,7 @@ const MIN_EXPIRE: Duration = Duration::from_secs(60);
 const MAX_EXPIRE: Duration = Duration::from_secs(604_800);
 
 /// One send. Everything is optional: a `Message::new()` with nothing on it is a
-/// vital's heartbeat.
+/// beat on a heartbeat.
 #[derive(Debug, Clone, Default)]
 pub struct Message {
     title: Option<String>,

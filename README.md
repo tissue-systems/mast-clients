@@ -53,7 +53,7 @@ can page somebody twice. Retry with a dedupe key, or not at all.
 
 ## Wire contract
 
-`POST /m/{key}` sends, `POST /m/{key}/fail` flatlines a vital, and
+`POST /m/{key}` sends, `POST /m/{key}/fail` flatlines a heartbeat, and
 `GET /m/{key}/messages/{id}` reads one message's state. Fields, caps, states and
 the incident lifecycle are documented at
 <https://tissue.systems/docs/mast/connect/>.

@@ -159,14 +159,14 @@ func (c *Channel) ResolveMessage(ctx context.Context, messageID string, m Messag
 	return c.Send(ctx, m)
 }
 
-// Ping is a heartbeat on a vital. An empty Message is proof of life and no
+// Ping sends a beat to a heartbeat. An empty Message is proof of life and no
 // card, so there is no id to follow.
 func (c *Channel) Ping(ctx context.Context, m Message) (Sent, error) {
 	return c.Send(ctx, m)
 }
 
-// Fail flatlines a vital now rather than waiting out its grace window. Only a
-// vital has this route; a plain channel answers the 404 an unknown key gets.
+// Fail flatlines a heartbeat now rather than waiting out its grace window. Only a
+// heartbeat has this route; a plain channel answers the 404 an unknown key gets.
 func (c *Channel) Fail(ctx context.Context, m Message) (Sent, error) {
 	form, err := m.form()
 	if err != nil {

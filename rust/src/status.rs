@@ -10,7 +10,7 @@ pub enum State {
     Muted,
     Deduped,
     Suppressed,
-    /// A vital's heartbeat. It stores no card, so there is no id to follow.
+    /// A beat on a heartbeat. It stores no card, so there is no id to follow.
     Alive,
     Acked,
     Resolved,
@@ -42,7 +42,7 @@ impl State {
 /// What Mast answered a send with.
 #[derive(Debug, Clone)]
 pub struct Sent {
-    /// None for a heartbeat, which stores no card.
+    /// None for a beat, which stores no card.
     pub id: Option<String>,
     pub state: State,
     /// True when the send folded into a card an earlier one opened.

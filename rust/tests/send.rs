@@ -220,20 +220,20 @@ async fn measures_the_caps_in_characters() {
 }
 
 #[tokio::test]
-async fn a_heartbeat_carries_nothing() {
+async fn a_beat_carries_nothing() {
     let stub = Stub::answering(202, r#"{"state":"alive"}"#);
     let sent = channel(&stub).ping(Message::new()).await.unwrap();
 
     assert_eq!(stub.last_body(), "");
     assert_eq!(sent.state, State::Alive);
-    assert!(sent.id.is_none(), "a heartbeat stores no card to follow");
+    assert!(sent.id.is_none(), "a beat stores no card to follow");
 }
 
 #[tokio::test]
-async fn flatlining_a_vital_has_its_own_route() {
+async fn flatlining_a_heartbeat_has_its_own_route() {
     let stub = Stub::answering(202, ACCEPTED);
     channel(&stub)
-        .fail(Message::new().title("no heartbeat"))
+        .fail(Message::new().title("no beat"))
         .await
         .unwrap();
     assert_eq!(

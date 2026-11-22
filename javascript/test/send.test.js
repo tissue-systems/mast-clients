@@ -50,7 +50,7 @@ describe("send", () => {
     assert.equal(mast.lastSend.fields.priority, "page");
   });
 
-  test("a heartbeat carries no fields at all", async () => {
+  test("a beat carries no fields at all", async () => {
     mast.state = "alive";
     const sent = await channel.ping();
     assert.equal(sent.state, "alive");
@@ -90,9 +90,9 @@ describe("send", () => {
     assert.deepEqual(mast.sends, []);
   });
 
-  test("fail() posts to the vital's own route", async () => {
+  test("fail() posts to the heartbeat's own route", async () => {
     mast.state = "queued";
-    await channel.fail({ body: "no heartbeat" });
+    await channel.fail({ body: "no beat" });
     assert.ok(mast.lastSend.path.endsWith("/fail"));
   });
 

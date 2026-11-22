@@ -56,7 +56,7 @@ func TestPageAsksForThePagerTier(t *testing.T) {
 	}
 }
 
-func TestAHeartbeatCarriesNothing(t *testing.T) {
+func TestABeatCarriesNothing(t *testing.T) {
 	mast := newFakeMast(t)
 	mast.state = "alive"
 	channel := mast.channel(t, goodKey)
@@ -69,7 +69,7 @@ func TestAHeartbeatCarriesNothing(t *testing.T) {
 		t.Errorf("state = %q, want alive", sent.State)
 	}
 	if got := mast.lastSend(t).fields; len(got) != 0 {
-		t.Errorf("a heartbeat sent %v", got)
+		t.Errorf("a beat sent %v", got)
 	}
 }
 
@@ -133,11 +133,11 @@ func TestResolveNeedsSomethingToClose(t *testing.T) {
 	}
 }
 
-func TestFailPostsToTheVitalsOwnRoute(t *testing.T) {
+func TestFailPostsToTheHeartbeatsOwnRoute(t *testing.T) {
 	mast := newFakeMast(t)
 	channel := mast.channel(t, goodKey)
 
-	if _, err := channel.Fail(context.Background(), Message{Body: "no heartbeat"}); err != nil {
+	if _, err := channel.Fail(context.Background(), Message{Body: "no beat"}); err != nil {
 		t.Fatal(err)
 	}
 	if got := mast.lastSend(t).path; !strings.HasSuffix(got, "/fail") {

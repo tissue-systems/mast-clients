@@ -39,7 +39,7 @@ const (
 )
 
 // Message is one send. Every field is optional: a Message with nothing in it is
-// a vital's heartbeat.
+// a beat on a heartbeat.
 type Message struct {
 	Title    string
 	Body     string
